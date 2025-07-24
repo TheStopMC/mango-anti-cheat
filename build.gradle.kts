@@ -3,10 +3,9 @@ plugins {
     id("maven-publish")
 }
 
-var versionStr = System.getenv("GIT_COMMIT") ?: "dev"
 
 group = "net.mangolise"
-version = versionStr
+version = "versionStr"
 
 repositories {
     mavenLocal()
@@ -21,10 +20,6 @@ dependencies {
 //    testImplementation("org.junit.jupiter:junit-jupiter")
 //    testImplementation("net.mangolise:mango-combat:latest")
 //    testImplementation("dev.hollowcube:polar:1.14.5")
-}
-
-tasks.test {
-    useJUnitPlatform()
 }
 
 java {
