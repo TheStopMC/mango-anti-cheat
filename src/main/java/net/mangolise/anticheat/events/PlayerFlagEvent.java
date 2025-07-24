@@ -1,9 +1,10 @@
 package net.mangolise.anticheat.events;
 
 import net.minestom.server.entity.Player;
-import net.minestom.server.event.Event;
+import net.minestom.server.event.trait.PlayerEvent;
+import org.jetbrains.annotations.NotNull;
 
-public class PlayerFlagEvent implements Event {
+public class PlayerFlagEvent implements PlayerEvent {
     private final String checkName;
     private final Player player;
     private final float certainty;
@@ -18,11 +19,12 @@ public class PlayerFlagEvent implements Event {
         return checkName;
     }
 
-    public Player player() {
-        return player;
-    }
-
     public float certainty() {
         return certainty;
+    }
+
+    @Override
+    public @NotNull Player getPlayer() {
+        return player;
     }
 }

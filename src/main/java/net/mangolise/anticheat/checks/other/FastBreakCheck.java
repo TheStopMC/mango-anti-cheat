@@ -1,8 +1,9 @@
 package net.mangolise.anticheat.checks.other;
 
 import net.mangolise.anticheat.ACCheck;
-import net.minestom.server.MinecraftServer;
+import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerPacketEvent;
+import net.minestom.server.event.trait.EntityEvent;
 import net.minestom.server.network.packet.client.play.ClientPlayerDiggingPacket;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
@@ -16,8 +17,8 @@ public class FastBreakCheck extends ACCheck {
     }
 
     @Override
-    public void register() {
-        MinecraftServer.getGlobalEventHandler().addListener(PlayerPacketEvent.class, this::playerPacket);
+    public void register(EventNode<EntityEvent> events) {
+        events.addListener(PlayerPacketEvent.class, this::playerPacket);
     }
 
     private void playerPacket(@NotNull PlayerPacketEvent event) {

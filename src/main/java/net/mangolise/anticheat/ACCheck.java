@@ -6,9 +6,12 @@ import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.EntityPose;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.attribute.Attribute;
+import net.minestom.server.event.EventNode;
+import net.minestom.server.event.trait.EntityEvent;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.timer.TaskSchedule;
@@ -47,13 +50,13 @@ public abstract class ACCheck {
         this.name = name;
     }
 
-    public void enable(MangoAC ac, MangoAC.Config config) {
+    public void enable(MangoAC ac, MangoAC.Config config, EventNode<EntityEvent> events) {
         this.config = config;
         this.ac = ac;
-        register();
+        register(events);
     }
 
-    public abstract void register();
+    public abstract void register(EventNode<EntityEvent> events);
 
     public String name() {
         return name;
@@ -136,7 +139,11 @@ public abstract class ACCheck {
         if (p.getGameMode() != GameMode.SURVIVAL && p.getGameMode() != GameMode.ADVENTURE) {
             return true;
         }
+
         //TODO: Riptide
+        if (p.getPose().equals(EntityPose.SPIN_ATTACK)) {
+            return true;
+        }
         if (p.isAllowFlying()) {
             return true;
         }
@@ -164,6 +171,9 @@ public abstract class ACCheck {
             if (standingOn.contains(Block.SOUL_SAND.id()) || standingOn.contains(Block.SOUL_SOIL.id()) && ACUtils.isUsingSoulSpeed(p)) {
                 return true;
             }
+            if (p.isSneaking() && ACUtils.isUsingSwiftSneak(p)) {
+                return true;
+            }
 
             return standingOn.contains(Block.ICE.id());
         }
@@ -176,14 +186,12 @@ public abstract class ACCheck {
                 p.isAllowFlying() ||
                 p.isFlyingWithElytra() ||
                 p.getVehicle() != null ||
-                p.hasEffect(PotionEffect.JUMP_BOOST);
+                p.hasEffect(PotionEffect.JUMP_BOOST) ||
+                p.getPose().equals(EntityPose.SPIN_ATTACK);
     }
 
     public boolean isFullBlock(Block block) {
-        if (!block.isSolid()) {
-            return false;
-        }
-        if (block.key().asString().contains("stair")) {
+        if (!block.isSolid() || block.key().value().contains("stair") || block.key().value().contains("slab")) {
             return false;
         }
         Point start = block.registry().collisionShape().relativeStart();

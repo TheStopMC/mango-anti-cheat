@@ -2,11 +2,12 @@ package net.mangolise.anticheat.checks.movement;
 
 import net.mangolise.anticheat.ACCheck;
 import net.mangolise.anticheat.Tuple;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.EntityTeleportEvent;
 import net.minestom.server.event.player.PlayerMoveEvent;
+import net.minestom.server.event.trait.EntityEvent;
 import net.minestom.server.tag.Tag;
 
 import java.util.ArrayList;
@@ -30,9 +31,9 @@ public class BasicSpeedCheck extends ACCheck {
     }
 
     @Override
-    public void register() {
-        MinecraftServer.getGlobalEventHandler().addListener(PlayerMoveEvent.class, this::onMove);
-        MinecraftServer.getGlobalEventHandler().addListener(EntityTeleportEvent.class, e -> {
+    public void register(EventNode<EntityEvent> events) {
+        events.addListener(PlayerMoveEvent.class, this::onMove);
+        events.addListener(EntityTeleportEvent.class, e -> {
             if (e.getEntity() instanceof Player player) {
                 player.getTag(PLAYER_DETAILS_TAG).clear(); // Won't be accurate
             }

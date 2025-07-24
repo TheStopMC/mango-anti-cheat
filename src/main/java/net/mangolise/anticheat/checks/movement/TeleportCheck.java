@@ -1,9 +1,10 @@
 package net.mangolise.anticheat.checks.movement;
 
 import net.mangolise.anticheat.ACCheck;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerMoveEvent;
+import net.minestom.server.event.trait.EntityEvent;
 
 public class TeleportCheck extends ACCheck {
     private final static float UP_THRESHOLD = 3;
@@ -15,8 +16,8 @@ public class TeleportCheck extends ACCheck {
     }
 
     @Override
-    public void register() {
-        MinecraftServer.getGlobalEventHandler().addListener(PlayerMoveEvent.class, this::onMove);
+    public void register(EventNode<EntityEvent> events) {
+        events.addListener(PlayerMoveEvent.class, this::onMove);
     }
 
     private void onMove(PlayerMoveEvent e) {

@@ -6,16 +6,21 @@ import net.mangolise.anticheat.checks.combat.KillauraManualCheck;
 import net.mangolise.anticheat.checks.combat.ReachCheck;
 import net.mangolise.anticheat.checks.exploits.IntOverflowCrashCheck;
 import net.mangolise.anticheat.checks.movement.*;
+import net.mangolise.anticheat.checks.other.BlockReachCheck;
 import net.mangolise.anticheat.checks.other.FastBreakCheck;
-import net.minestom.server.MinecraftServer;
+import net.mangolise.anticheat.checks.other.NukerCheck;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
-import net.minestom.server.event.player.PlayerPacketOutEvent;
+import net.minestom.server.event.EventFilter;
+import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerSpawnEvent;
+import net.minestom.server.event.trait.EntityEvent;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.network.packet.server.play.BlockChangePacket;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class MangoAC {
@@ -28,6 +33,8 @@ public class MangoAC {
         new TeleportCheck(),
         new BasicSpeedCheck(),
         new ReachCheck(),
+        new NukerCheck(),
+        new BlockReachCheck(),
         new CpsCheck(),
         new HitConsistencyCheck(),
         new TeleportSpamCheck(),
@@ -52,25 +59,25 @@ public class MangoAC {
     public void start() {
         checks.forEach(acCheck -> {
             if (config.disabledChecks.contains(acCheck.getClass())) return;
-            acCheck.enable(this, config);
+            acCheck.enable(this, config, config.eventNode());
         });
 
-        MinecraftServer.getGlobalEventHandler().addListener(PlayerSpawnEvent.class, e ->
+        config.eventNode().addListener(PlayerSpawnEvent.class, e ->
                 fakeBlocks.remove(e.getPlayer().getUuid()));
 
         // This is WIP, just disable flight and levi if you have fake blocks
-        MinecraftServer.getGlobalEventHandler().addListener(PlayerPacketOutEvent.class, e -> {
-            switch (e.getPacket()) {
-                case BlockChangePacket packet -> {
-                    if (!fakeBlocks.containsKey(e.getPlayer().getUuid())) {
-                        fakeBlocks.put(e.getPlayer().getUuid(), new ArrayList<>());
-                    }
-
-                    fakeBlocks.get(e.getPlayer().getUuid()).add(new Tuple<>(packet.blockPosition(), Block.STONE));
-                }
-                default -> { }
-            }
-        });
+//        events.addListener(PlayerPacketOutEvent.class, e -> {
+//            switch (e.getPacket()) {
+//                case BlockChangePacket packet -> {
+//                    if (!fakeBlocks.containsKey(e.getPlayer().getUuid())) {
+//                        fakeBlocks.put(e.getPlayer().getUuid(), new ArrayList<>());
+//                    }
+//
+//                    fakeBlocks.get(e.getPlayer().getUuid()).add(new Tuple<>(packet.blockPosition(), Block.STONE));
+//                }
+//                default -> { }
+//            }
+//        });
     }
 
     public void tempDisableCheck(Player player, Class<? extends ACCheck> check, int time) {
@@ -87,9 +94,9 @@ public class MangoAC {
     /**
      * @param passive
      */
-    public record Config(boolean passive, List<Class<? extends ACCheck>> disabledChecks, List<String> debugChecks, List<Class<? extends ACCheck>> innocentChecks) {
+    public record Config(boolean passive, List<Class<? extends ACCheck>> disabledChecks, List<String> debugChecks, List<Class<? extends ACCheck>> innocentChecks, EventNode<EntityEvent> eventNode) {
         public Config() {
-            this(false, List.of(), List.of(), List.of(PhaseCheck.class));
+            this(false, List.of(), List.of(), List.of(PhaseCheck.class), EventNode.type("mango-anticheat", EventFilter.ENTITY));
         }
 
         /**
@@ -106,7 +113,7 @@ public class MangoAC {
          * @return The new config.
          */
         public Config withPassive(boolean passive) {
-            return new Config(passive, disabledChecks, debugChecks, innocentChecks);
+            return new Config(passive, disabledChecks, debugChecks, innocentChecks, eventNode);
         }
 
         /**
@@ -115,7 +122,7 @@ public class MangoAC {
          * @return The new config.
          */
         public Config withInnocentChecks(List<Class<? extends ACCheck>> innocentChecks) {
-            return new Config(passive, disabledChecks, debugChecks, innocentChecks);
+            return new Config(passive, disabledChecks, debugChecks, innocentChecks, eventNode);
         }
 
         /**
@@ -124,7 +131,7 @@ public class MangoAC {
          * @return The new config.
          */
         public Config withDisabledChecks(List<Class<? extends ACCheck>> disabledChecks) {
-            return new Config(passive, disabledChecks, debugChecks, innocentChecks);
+            return new Config(passive, disabledChecks, debugChecks, innocentChecks, eventNode);
         }
 
         /**
@@ -133,7 +140,16 @@ public class MangoAC {
          * @return The new config.
          */
         public Config withDebugChecks(List<String> debugChecks) {
-            return new Config(passive, disabledChecks, debugChecks, innocentChecks);
+            return new Config(passive, disabledChecks, debugChecks, innocentChecks, eventNode);
+        }
+
+        /**
+         * The event node that all listeners are registered too
+         * @param eventNode The value.
+         * @return The new config.
+         */
+        public Config withEventNode(EventNode<EntityEvent> eventNode) {
+            return new Config(passive, disabledChecks, debugChecks, innocentChecks, eventNode);
         }
     }
 }

@@ -1,13 +1,16 @@
 package net.mangolise.anticheat.checks.movement;
 
 import net.mangolise.anticheat.ACCheck;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.EntityDamageEvent;
 import net.minestom.server.event.player.PlayerMoveEvent;
+import net.minestom.server.event.trait.EntityEvent;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 public class UnaidedLevitationCheck extends ACCheck {
     private final static int THRESHOLD = 3;
@@ -18,9 +21,9 @@ public class UnaidedLevitationCheck extends ACCheck {
     }
 
     @Override
-    public void register() {
-        MinecraftServer.getGlobalEventHandler().addListener(PlayerMoveEvent.class, this::onMove);
-        MinecraftServer.getGlobalEventHandler().addListener(EntityDamageEvent.class, this::onDamage);
+    public void register(EventNode<EntityEvent> events) {
+        events.addListener(PlayerMoveEvent.class, this::onMove);
+        events.addListener(EntityDamageEvent.class, this::onDamage);
     }
 
     private void onDamage(@NotNull EntityDamageEvent event) {
@@ -47,6 +50,11 @@ public class UnaidedLevitationCheck extends ACCheck {
         Pos from = e.getPlayer().getPosition();
         Pos to = e.getNewPosition();
         if (from.y() > to.y()) {
+            return;
+        }
+
+        if (Objects.requireNonNull(from).y() % 1.0 == 0.5) {
+            debug(p, "most likely on fence");
             return;
         }
 

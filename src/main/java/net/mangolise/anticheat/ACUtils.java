@@ -13,6 +13,9 @@ public class ACUtils {
     public static boolean isUsingSoulSpeed(Player p) {
         return hasEnchantment(p.getEquipment(EquipmentSlot.BOOTS), Enchantment.SOUL_SPEED);
     }
+    public static boolean isUsingSwiftSneak(Player p) {
+        return hasEnchantment(p.getEquipment(EquipmentSlot.LEGGINGS), Enchantment.SWIFT_SNEAK);
+    }
 
     public static boolean hasEnchantment(ItemStack item, RegistryKey<Enchantment> enchantment) {
         EnchantmentList enchantments = item.get(DataComponents.ENCHANTMENTS);

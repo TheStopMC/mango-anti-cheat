@@ -2,12 +2,14 @@ package net.mangolise.anticheat.checks.combat;
 
 import net.mangolise.anticheat.ACCheck;
 import net.mangolise.anticheat.Tuple;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.EntityAttackEvent;
+import net.minestom.server.event.trait.EntityEvent;
 import net.minestom.server.tag.Tag;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class HitConsistencyCheck extends ACCheck {
     private static final double THRESHOLD = 1;
@@ -20,8 +22,8 @@ public class HitConsistencyCheck extends ACCheck {
     }
 
     @Override
-    public void register() {
-        MinecraftServer.getGlobalEventHandler().addListener(EntityAttackEvent.class, e -> {
+    public void register(EventNode<EntityEvent> events) {
+        events.addListener(EntityAttackEvent.class, e -> {
             if (!(e.getEntity() instanceof Player player)) {
                 return;
             }

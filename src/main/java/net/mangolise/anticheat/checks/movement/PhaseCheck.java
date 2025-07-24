@@ -1,11 +1,12 @@
 package net.mangolise.anticheat.checks.movement;
 
 import net.mangolise.anticheat.ACCheck;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.GameMode;
+import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerMoveEvent;
+import net.minestom.server.event.trait.EntityEvent;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,8 +23,8 @@ public class PhaseCheck extends ACCheck {
     }
 
     @Override
-    public void register() {
-        MinecraftServer.getGlobalEventHandler().addListener(PlayerMoveEvent.class, this::onMove);
+    public void register(EventNode<EntityEvent> events) {
+        events.addListener(PlayerMoveEvent.class, this::onMove);
     }
 
     private void onMove(@NotNull PlayerMoveEvent event) {

@@ -5,7 +5,9 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerPacketEvent;
+import net.minestom.server.event.trait.EntityEvent;
 import net.minestom.server.network.packet.client.play.ClientInteractEntityPacket;
 import net.minestom.server.network.packet.server.play.DestroyEntitiesPacket;
 import net.minestom.server.network.packet.server.play.PlayerInfoUpdatePacket;
@@ -29,8 +31,8 @@ public class KillauraManualCheck extends ManualCheck {
     }
 
     @Override
-    public void register() {
-        MinecraftServer.getGlobalEventHandler().addListener(PlayerPacketEvent.class, this::processPacket);
+    public void register(EventNode<EntityEvent> events) {
+        events.addListener(PlayerPacketEvent.class, this::processPacket);
     }
 
     private void processPacket(@NotNull PlayerPacketEvent event) {
@@ -82,7 +84,7 @@ public class KillauraManualCheck extends ManualCheck {
                         GameMode.SURVIVAL,
                         null,
                         null,
-                        0));
+                        1));
 
         player.sendPacket(addPlayerInfo);
         player.sendPacket(packet);
