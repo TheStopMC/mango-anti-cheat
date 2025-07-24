@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    implementation("net.mangolise:mango-game-sdk:latest")
+//    implementation("net.mangolise:mango-game-sdk:latest")
     implementation("net.minestom:minestom:2025.07.10b-1.21.7")
 //    testImplementation(platform("org.junit:junit-bom:5.10.0"))
 //    testImplementation("org.junit.jupiter:junit-jupiter")
